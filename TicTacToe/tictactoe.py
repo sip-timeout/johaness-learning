@@ -1,4 +1,4 @@
-list_of_winners_to_ensure_only_one_player_won = []
+list_of_winners = []
 
 class Gameboard(object):
     def __init__(self, board):
@@ -8,23 +8,23 @@ class Gameboard(object):
 
 
 def column_check(player, column_number):
-    global list_of_winners_to_ensure_only_one_player_won
+    global list_of_winners
     if game_board.get()[0][column_number] == player and game_board.get()[1][column_number] == player and game_board.get()[2][column_number] == player:
-        list_of_winners_to_ensure_only_one_player_won.append(player)
+        list_of_winners.append(player)
 
 def row_check(player, row_number):
-    global list_of_winners_to_ensure_only_one_player_won
+    global list_of_winners
     if game_board.get()[row_number][0] == player and game_board.get()[row_number][1] == player and game_board.get()[row_number][2] == player:
-        list_of_winners_to_ensure_only_one_player_won.append(player)
+        list_of_winners.append(player)
 
 def diagonal_check(player):
-    global list_of_winners_to_ensure_only_one_player_won
+    global list_of_winners
     if game_board.get()[0][0] == player and game_board.get()[1][1] == player and game_board.get()[2][2] == player or game_board.get()[2][0] == player and game_board.get()[1][1] == player and game_board.get()[0][2] == player:
-        list_of_winners_to_ensure_only_one_player_won.append(player)
+        list_of_winners.append(player)
 
 def __main__(input_matrix):
     global game_board
-    global list_of_winners_to_ensure_only_one_player_won
+    global list_of_winners
 
     game_board = Gameboard(input_matrix)
 
@@ -43,13 +43,13 @@ def __main__(input_matrix):
         diagonal_check(y)
 
     # Is it a tie?
-    if list_of_winners_to_ensure_only_one_player_won == []:
+    if list_of_winners == []:
         print("It's a tie!")
         return "tie"
 
-    if len(list_of_winners_to_ensure_only_one_player_won) == 1:
-        print("Player " + str(list_of_winners_to_ensure_only_one_player_won[0]) + " won!")
-        return list_of_winners_to_ensure_only_one_player_won
+    if len(list_of_winners) == 1:
+        print("Player " + str(list_of_winners[0]) + " won!")
+        return list_of_winners
 
     else:
         print("More than one player won! I think there's something wrong with the input.")
