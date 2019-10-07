@@ -1,32 +1,29 @@
 import time
+import re
 
-def set_pin():
-    user_input = None
-    while not pin_input_well_formed_check(user_input):
-        user_input = input("Please choose your four digit PIN. ")
-    return user_input
+class Pin(object):
+    def __init__(self, pin_value):
+        self.pin_value = pin_value
+
+    def set_pin(self):
+        user_input = input("Please enter the PIN you would like to use: ")
+        while re.match("^\d\d\d\d$",user_input) is None:
+            user_input = input("Please enter a well-formed PIN(four digits): ")
+        self.pin_value = user_input
+
+    def get_pin(self):
+        return self.pin_value
 
 
-def pin_input_well_formed_check(pin_input_to_be_checked):
-    if pin_input_to_be_checked == None:
-        return False
-    try:
-        int(pin_input_to_be_checked)
-    except:
-        print("You entered characters other than digits. Please try again.")
-        return False
-    if len(pin_input_to_be_checked) < 4:
-        print("You did not enter enough digits. Please try again.")
-        return False
-    if len(pin_input_to_be_checked) > 4:
-        print("You entered too many digits. Please try again.")
-        return False
-    if int(pin_input_to_be_checked) < 0:
-        print("Please refrain from trying to enter a negative number. Thank you.")
-        return False
-    else:
-        print("Thank you. You have set your pin to:" + pin_input_to_be_checked)
-        return True
+class Balance(object):
+    def __init__(self, balance):
+        self.balance = balance
+
+    def get_balance(self):
+        return self.balance
+
+    def set_balance(self, new_balance):
+        self.balance = new_balance
 
 
 def pin_check(pin):
@@ -42,37 +39,34 @@ def pin_check(pin):
     quit()
 
 
-def set_initial_balance():
-    balance = input("Please enter your initial balance. ")
-    while not is_input_a_positive_float_with_a_max_of_two_decimal_places_check(balance):
-        balance = input("Please enter your initial balance. ")
+def set_initial_balance(balance):
+    balance.set_balance(input("Please enter your initial balance. "))
+    while not is_input_a_positive_float_with_a_max_of_two_decimal_places_check(balance.get_balance()):
+        print("Your initial balance must be positive and cannot contain more than two decimals after the dot.")
+        balance.set_balance(input("Please enter your initial balance. "))
     print("Thank you.")
+    # This sleep is just for a comfortable user experience. IMO it feels more organic to have the menu appear only
+    # after a second.
     time.sleep(1)
-    return balance
+    return balance.get_balance
 
 
 def is_input_a_positive_float_with_a_max_of_two_decimal_places_check(input_to_be_checked):
-    try:
-        float(input_to_be_checked)
-    except:
-        print("You entered characters other than digits. Please try again.")
-        return False
-
-    if float(input_to_be_checked) <= 0:
-        print("Please enter a positive amount.")
-        return False
-
-    if "." in input_to_be_checked:
-        if len((input_to_be_checked.split("."))[1]) > 2:
-            print("Please enter an amount without fractions of cents.")
+    for x in input_to_be_checked:
+        if re.match("[0-9.]", x) is None:
             return False
-        else:
-            return True
-    else:
-        return True
+
+    if len(re.findall("\.", input_to_be_checked))>1:
+            return False
+
+    # Checking whether the dot is in the second or third last position:
+    elif len(re.findall("\.", input_to_be_checked))==1 and not (input_to_be_checked[len(input_to_be_checked) - 2] == "." or input_to_be_checked[len(input_to_be_checked) - 3] == "."):
+        return False
+
+    return True
 
 
-def withdraw():
+def withdraw(balance):
     amount_chosen = input("How much money would you like to withdraw? You may withdraw 20 EUR, 50 EUR or (O)ther amount.")
 
     while not amount_chosen in ["20", "50", "O"]:
@@ -83,12 +77,13 @@ def withdraw():
     if amount_chosen == "O":
         amount_chosen = input("Please enter the amount you would like to withdraw. ")
         while not is_input_a_positive_float_with_a_max_of_two_decimal_places_check(amount_chosen):
+            print("You may choose any positive amount with a maximum of two decimal places.")
             amount_chosen = input("Please enter the amount you would like to withdraw. ")
 
     amount_chosen = float(amount_chosen)
 
-    if check_if_balance_allows_withdrawal(amount_chosen):
-        update_balance(amount_chosen)
+    if check_if_balance_allows_withdrawal(amount_chosen,balance):
+        update_balance(amount_chosen,balance)
         print("Here you go!")
         time.sleep(1)
 
@@ -103,33 +98,21 @@ def withdraw_other_amount():
     return input_amount
 
 
-def update_balance(amount_withdrawn):
-    global balance
-    balance = balance - float(amount_withdrawn)
+def update_balance(amount_withdrawn, balance):
+    balance.set_balance(float(balance.get_balance()) - float(amount_withdrawn))
 
-
-def change_pin():
-    global pin
-    pin = set_pin()
-    print("You have successfully changed your PIN.")
-
-
-def check_if_balance_allows_withdrawal(amount_to_be_tested):
-    if balance - amount_to_be_tested > 0:
-        return True
-    else:
-        return False
-
+def check_if_balance_allows_withdrawal(amount_to_be_tested, balance):
+    return float(balance.get_balance()) - amount_to_be_tested >= 0
 
 def __main__():
-    global pin
-    global balance
-
     print("Welcome.")
 
-    pin = set_pin()
+    pin = Pin(None)
+    pin.set_pin()
+    print("You have set your PIN to " + str(pin.get_pin()) + ".")
 
-    balance = float(set_initial_balance())
+    balance = Balance(None)
+    set_initial_balance(balance)
 
     menu_option_chosen = None
     while not menu_option_chosen == "E":
@@ -141,17 +124,17 @@ def __main__():
             \n(E)xit""")
         menu_option_chosen = input()
 
-        if menu_option_chosen == "A":
-            if pin_check(pin):
-                print("Your current account balance is " + str(balance) + ".")
+        if menu_option_chosen in ["A","W","C"]:
+            if pin_check(pin.get_pin()):
+                if menu_option_chosen == "A":
+                    print("Your current account balance is " + str(balance.get_balance()) + ".")
 
-        if menu_option_chosen == "W":
-            if pin_check(pin):
-                withdraw()
+                elif menu_option_chosen == "W":
+                    withdraw(balance)
 
-        if menu_option_chosen == "C":
-            if pin_check(pin):
-                change_pin()
+                elif menu_option_chosen == "C":
+                    # change_pin()
+                    pin.set_pin()
 
         if menu_option_chosen not in ["A","W","C","E"]:
             print("Please choose one of the options provided.")
