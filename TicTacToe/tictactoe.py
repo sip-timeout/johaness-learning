@@ -6,48 +6,66 @@ class Gameboard(object):
     def get(self):
         return self.board
 
+def row_check(board, row_number):
+    list_of_unique_members_of_row = []
+    for i in range (0,len(board[0])):
+        if board[row_number][i] not in list_of_unique_members_of_row:
+            list_of_unique_members_of_row.append(board[row_number][i])
 
-def column_check(player, column_number):
-    global list_of_winners
-    if game_board.get()[0][column_number] == player and game_board.get()[1][column_number] == player and game_board.get()[2][column_number] == player:
-        list_of_winners.append(player)
+    if len(list_of_unique_members_of_row) == 1:
+        if list_of_unique_members_of_row[0] not in list_of_winners:
+            list_of_winners.append(list_of_unique_members_of_row[0])
 
-def row_check(player, row_number):
-    global list_of_winners
-    if game_board.get()[row_number][0] == player and game_board.get()[row_number][1] == player and game_board.get()[row_number][2] == player:
-        list_of_winners.append(player)
+def column_check(board, column_number):
+    list_of_unique_members_of_column = []
+    for i in range(0, len(board[0])):
+        if board[i][column_number] not in list_of_unique_members_of_column:
+            list_of_unique_members_of_column.append(board[i][column_number])
 
-def diagonal_check(player):
-    global list_of_winners
-    if game_board.get()[0][0] == player and game_board.get()[1][1] == player and game_board.get()[2][2] == player or game_board.get()[2][0] == player and game_board.get()[1][1] == player and game_board.get()[0][2] == player:
-        list_of_winners.append(player)
+    if len(list_of_unique_members_of_column) == 1:
+        if list_of_unique_members_of_column[0] not in list_of_winners:
+            list_of_winners.append(list_of_unique_members_of_column[0])
+
+def diagonal_check_top_left_to_bottom_right(board):
+    list_of_unique_members_of_diagonal = []
+    for i in range(0, len(board[0])):
+        if board[i][i] not in list_of_unique_members_of_diagonal:
+            list_of_unique_members_of_diagonal.append(board[i][i])
+
+    if len(list_of_unique_members_of_diagonal) == 1:
+        if list_of_unique_members_of_diagonal[0] not in list_of_winners:
+            list_of_winners.append(list_of_unique_members_of_diagonal[0])
+
+def diagonal_check_bottom_left_to_top_right(board):
+    list_of_unique_members_of_diagonal = []
+    for i in range(0, len(board[0])):
+        if board[i][(len(board)-i-1)] not in list_of_unique_members_of_diagonal:
+            list_of_unique_members_of_diagonal.append(board[i][(len(board)-i-1)])
+
+    if len(list_of_unique_members_of_diagonal) == 1:
+        if list_of_unique_members_of_diagonal[0] not in list_of_winners:
+            list_of_winners.append(list_of_unique_members_of_diagonal[0])
 
 def __main__(input_matrix):
-    global game_board
-    global list_of_winners
 
     game_board = Gameboard(input_matrix)
 
-    # Has anyone completed a row?
-    for y in range(1,3):
-        for x in range(3):
-           row_check(y,x)
+    for i in range(0, len(game_board.get()[0])):
+        row_check(game_board.get(), i)
 
-    # Has anyone completed a column?
-    for y in range(1,3):
-        for x in range(3):
-            column_check(y,x)
+    for i in range(0, len(game_board.get()[0])):
+        column_check(game_board.get(), i)
 
-    # Has anyone completed a diagonal?
-    for y in range(1,3):
-        diagonal_check(y)
+    diagonal_check_top_left_to_bottom_right(game_board.get())
+
+    diagonal_check_bottom_left_to_top_right(game_board.get())
 
     # Is it a tie?
     if list_of_winners == []:
         print("It's a tie!")
         return "tie"
 
-    if len(list_of_winners) == 1:
+    elif len(list_of_winners) == 1:
         print("Player " + str(list_of_winners[0]) + " won!")
         return list_of_winners
 
@@ -55,4 +73,7 @@ def __main__(input_matrix):
         print("More than one player won! I think there's something wrong with the input.")
         return None
 
-__main__([[1,2,1],[1,1,2],[1,2,2]])
+__main__([[4,3,3,5],
+          [7,2,5,5],
+          [2,5,4,2],
+          [5,3,3,4]])
